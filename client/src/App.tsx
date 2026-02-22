@@ -1,35 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthPage, VideoUploadPage, ProtectedRoute } from './component';
+import { useAuth } from './context/authContext';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { user } = useAuth();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <Routes>
+        {/* Default route - redirects based on auth state */}
+        <Route 
+          path="/" 
+          element={<Navigate to={user ? "/upload" : "/auth"} replace />} 
+        />
+        
+        {/* Authentication page route - redirects to upload if user is logged in */}
+        <Route 
+          path="/auth" 
+          element={
+            <ProtectedRoute requireAuth={false}>
+              <AuthPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Video upload page route - requires authentication */}
+        <Route 
+          path="/upload" 
+          element={
+            <ProtectedRoute requireAuth={true}>
+              <VideoUploadPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Catch-all route for 404 - redirects based on auth state */}
+        <Route path="*" element={<Navigate to={user ? "/upload" : "/auth"} replace />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
