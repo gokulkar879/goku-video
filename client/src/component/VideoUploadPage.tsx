@@ -1,7 +1,10 @@
 import React, { useState, useRef } from 'react';
+import axios from 'axios';
 import './VideoUploadPage.css';
+import { useAuth } from '../context/authContext';
 
 const VideoUploadPage: React.FC = () => {
+  const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -39,6 +42,24 @@ const VideoUploadPage: React.FC = () => {
     }
   };
 
+  const getUploadURL = async () => {
+    console.log(user);
+    const token = user.tokens.accessToken.toString();
+
+    const res = await axios.post("http://localhost:3001/uploadVideo", {
+      fileName: selectedFile?.name,
+      type: selectedFile?.type
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    console.log(res.data);
+    const signedURL = res.data.data;
+    return signedURL;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -55,21 +76,30 @@ const VideoUploadPage: React.FC = () => {
       title,
       description,
     });
-    
-    // Simulate upload delay
-    setTimeout(() => {
+
+    try {
+      const uploadURl = await getUploadURL();
+
+      await axios.put(uploadURl, selectedFile, {
+        headers: {
+          'Content-Type': 'video/mp4'
+        }
+      });
+      console.log("Upload done!");
       setIsUploading(false);
-      alert('Video uploaded successfully!');
-      // Reset form
-      setSelectedFile(null);
-      setTitle('');
-      setDescription('');
-      setPreviewUrl(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }, 2000);
+      cleanUp();
+    } catch (err) {
+      console.log(err);
+      setIsUploading(false);
+    }  
   };
+
+  const cleanUp = () => {
+    setSelectedFile(null);
+    setDescription('');
+    setPreviewUrl('');
+    setTitle('');
+  }
 
   const handleBrowseClick = () => {
     fileInputRef.current?.click();

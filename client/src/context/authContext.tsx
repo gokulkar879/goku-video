@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { fetchAuthSession } from "aws-amplify/auth";
+import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
 import type { AuthSession } from "aws-amplify/auth";
 import type { ReactNode } from 'react';
 
@@ -15,13 +15,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     async function checkAuth() {
       try {
         const session = await fetchAuthSession();
-        console.log("user logged in");
+        console.log(session);
+        if(session.tokens == null) {
+          throw new Error('The user is not logged in');
+        }
         setUser(session);
       } catch (e) {
         console.log(e);
       }
 
     }
+
     checkAuth();
     // TODO: Check for stored session
     

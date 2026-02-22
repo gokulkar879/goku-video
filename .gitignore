@@ -31,3 +31,7 @@ server/package-lock.json
 
 
 client/.env
+server/.env
+
+
+client/package-lock.json
