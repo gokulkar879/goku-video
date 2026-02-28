@@ -9,6 +9,7 @@ const AuthContext = createContext<any>(undefined);
 // AuthProvider Component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthSession | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Initialize auth state
   useEffect(() => {
@@ -22,6 +23,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session);
       } catch (e) {
         console.log(e);
+      } finally {
+        setIsLoading(false);
       }
 
     }
@@ -33,7 +36,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const value = {
     user,
-    setUser
+    setUser,
+    isLoading
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
