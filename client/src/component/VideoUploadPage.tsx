@@ -48,7 +48,9 @@ const VideoUploadPage: React.FC = () => {
 
     const res = await axios.post("http://localhost:3001/uploadVideo", {
       fileName: selectedFile?.name,
-      type: selectedFile?.type
+      type: selectedFile?.type,
+      title: title,
+      description: description
     }, {
       headers: {
         'Authorization': `Bearer ${token}`
